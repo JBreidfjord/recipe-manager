@@ -15,7 +15,7 @@ export default function Create() {
   const ingredientInput = useRef(null);
   const { data, postData } = useFetch("http://localhost:3001/recipes", "POST");
   const navigate = useNavigate();
-  const { color } = useTheme();
+  const { color, mode } = useTheme();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -41,7 +41,7 @@ export default function Create() {
   }, [data, navigate]);
 
   return (
-    <div className="create">
+    <div className={`create ${mode}`}>
       <h2 className="page-title">Add a New Recipe</h2>
       <form onSubmit={handleSubmit}>
         <label>
