@@ -16,46 +16,43 @@ export const useFetch = (url, method = "GET") => {
     });
   };
 
-  useEffect(
-    (fetchOptions) => {
-      const controller = new AbortController();
+  useEffect(() => {
+    const controller = new AbortController();
 
-      const fetchData = async (fetchOptions) => {
-        setIsPending(true);
+    const fetchData = async (fetchOptions) => {
+      setIsPending(true);
 
-        try {
-          const res = await fetch(url, { ...fetchOptions, signal: controller.signal });
-          if (!res.ok) {
-            throw new Error(res.statusText);
-          }
-          const json = await res.json();
-
-          setIsPending(false);
-          setData(json);
-          setError(null);
-        } catch (err) {
-          if (err.name === "AbortError") {
-            console.log("Fetch aborted");
-          } else {
-            setIsPending(false);
-            setError("Error fetching data");
-            console.log(err.message);
-          }
+      try {
+        const res = await fetch(url, { ...fetchOptions, signal: controller.signal });
+        if (!res.ok) {
+          throw new Error(res.statusText);
         }
-      };
+        const json = await res.json();
 
-      if (method === "GET") {
-        fetchData();
-      } else if (method === "POST" && options) {
-        fetchData(options);
+        setIsPending(false);
+        setData(json);
+        setError(null);
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log("Fetch aborted");
+        } else {
+          setIsPending(false);
+          setError("Error fetching data");
+          console.log(err.message);
+        }
       }
+    };
 
-      return () => {
-        controller.abort();
-      };
-    },
-    [url, method, options]
-  );
+    if (method === "GET") {
+      fetchData();
+    } else if (method === "POST" && options) {
+      fetchData(options);
+    }
+
+    return () => {
+      controller.abort();
+    };
+  }, [url, method, options]);
 
   return { data, isPending, error, postData };
 };
