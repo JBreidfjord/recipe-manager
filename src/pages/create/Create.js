@@ -1,15 +1,42 @@
 import "./Create.css";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { useFetch } from "../../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
 
 export default function Create() {
   const [title, setTitle] = useState("");
   const [method, setMethod] = useState("");
   const [cookingTime, setCookingTime] = useState("");
+  const [newIngredient, setNewIngredient] = useState("");
+  const [ingredients, setIngredients] = useState([]);
+  const ingredientInput = useRef(null);
+  const { data, postData } = useFetch("http://localhost:3001/recipes", "POST");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    postData({ title, ingredients, method, cookingTime: cookingTime + " minutes" });
   };
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+
+    const ing = newIngredient.trim();
+    if (ing && !ingredients.includes(ing)) {
+      setIngredients((prevIngredients) => [...prevIngredients, ing]);
+    }
+
+    setNewIngredient("");
+    ingredientInput.current.focus();
+  };
+
+  useEffect(() => {
+    if (data) {
+      navigate("/");
+    }
+  }, [data, navigate]);
 
   return (
     <div className="create">
@@ -20,12 +47,34 @@ export default function Create() {
           <input type="text" onChange={(e) => setTitle(e.target.value)} value={title} required />
         </label>
 
-        {/* {ingredient input here} */}
+        <label>
+          <span>Recipe ingredients:</span>
+          <div className="ingredients">
+            <input
+              type="text"
+              onChange={(e) => setNewIngredient(e.target.value)}
+              value={newIngredient}
+              ref={ingredientInput}
+            />
+            <button className="btn" onClick={handleAdd}>
+              Add
+            </button>
+          </div>
+        </label>
+        {ingredients.length !== 0 && (
+          <p>
+            Current ingredients:{" "}
+            {ingredients.map((ing, i) =>
+              i === ingredients.length - 1 ? <em key={i}>{ing}</em> : <em key={i}>{ing}, </em>
+            )}
+          </p>
+        )}
 
         <label>
           <span>Recipe method:</span>
           <textarea onChange={(e) => setMethod(e.target.value)} value={method} required />
         </label>
+
         <label>
           <span>Cooking time (minutes):</span>
           <input
@@ -35,7 +84,10 @@ export default function Create() {
             required
           />
         </label>
-        <button className="btn">Submit</button>
+
+        <button className="btn" onClick={handleSubmit}>
+          Submit
+        </button>
       </form>
     </div>
   );
