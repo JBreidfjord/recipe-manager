@@ -45,3 +45,12 @@ textarea {
   text-align: center;
   margin: 40px auto;
 }
+
+.dark .loading,
+.dark .error {
+  color: #e4e4e4;
+}
+
+.dark .page-title {
+  color: #fff;
+}
