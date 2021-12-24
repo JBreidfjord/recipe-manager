@@ -17,11 +17,10 @@ export default function Recipe() {
   useEffect(() => {
     setIsPending(true);
 
-    projectFirestore
+    const unsub = projectFirestore
       .collection("recipes")
       .doc(id)
-      .get()
-      .then((doc) => {
+      .onSnapshot((doc) => {
         if (doc.exists) {
           setRecipe(doc.data());
           setError(false);
@@ -32,6 +31,8 @@ export default function Recipe() {
           setIsPending(false);
         }
       });
+
+    return () => unsub();
   }, [id]);
 
   return (
