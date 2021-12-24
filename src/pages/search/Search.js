@@ -19,30 +19,33 @@ export default function Search() {
   useEffect(() => {
     setIsPending(true);
 
-    projectFirestore
+    const unsub = projectFirestore
       .collection("recipes")
       .where("title", ">=", query)
-      .get()
-      .then((querySnapshot) => {
-        if (querySnapshot.empty) {
-          setError("No recipes found");
+      .onSnapshot(
+        (querySnapshot) => {
+          if (querySnapshot.empty) {
+            setError("No recipes found");
+            setRecipes(null);
+            setIsPending(false);
+          } else {
+            let results = [];
+            querySnapshot.docs.forEach((doc) => {
+              results.push({ id: doc.id, ...doc.data() });
+            });
+            setRecipes(results);
+            setError(false);
+            setIsPending(false);
+          }
+        },
+        (err) => {
+          setError(err.message);
           setRecipes(null);
           setIsPending(false);
-        } else {
-          let results = [];
-          querySnapshot.docs.forEach((doc) => {
-            results.push({ id: doc.id, ...doc.data() });
-          });
-          setRecipes(results);
-          setError(false);
-          setIsPending(false);
         }
-      })
-      .catch((err) => {
-        setError(err.message);
-        setRecipes(null);
-        setIsPending(false);
-      });
+      );
+
+    return () => unsub();
   }, [query]);
 
   return (
